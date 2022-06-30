@@ -1,52 +1,53 @@
-def list_kruskal(G):
-    return kruskal(G, list_get_edges(G))
+def list_kruskal(graph):
+    return kruskal(graph, list_get_edges(graph))
 
 
-def matrix_kruskal(G):
-    return kruskal(G, matrix_get_edges(G))
+def matrix_kruskal(graph):
+    return kruskal(graph, matrix_get_edges(graph))
 
 
-def kruskal(G, E):
+def kruskal(graph, edges):
     total_cost = 0
-    T = set()
-    C, R = {u: u for u in range(G.vertices)}, {u: 0 for u in range(G.vertices)}  # Comp. reps and ranks
-    for _, u, v in sorted(E):
-        if find(C, u) != find(C, v):
-            T.add((u, v))
-            total_cost += G.edges[u][v]
-            union(C, R, u, v)
+    tree = set()
+    groups = {u: u for u in range(graph.vertices)}      # every group representative points to itself
+    ranks = {u: 0 for u in range(graph.vertices)}
+    for _, u, v in sorted(edges):
+        if find(groups, u) != find(groups, v):
+            tree.add((u, v))
+            total_cost += graph.edges[u][v]
+            union(groups, ranks, u, v)
     print(total_cost)
-    return T
+    return tree
 
 
-def list_get_edges(G):
-    e = []
-    for i in range(G.vertices):
-        for key in G.edges[i]:
-            e.append((G.edges[i][key], i, key))
-    return e
+def list_get_edges(graph):
+    edges = []
+    for i in range(graph.vertices):
+        for key in graph.edges[i]:
+            edges.append((graph.edges[i][key], i, key))
+    return edges
 
 
-def matrix_get_edges(G):
-    e = []
-    for u in range(G.vertices):
-        for v in range(G.vertices):
-            if G.edges[u][v] != 0:
-                 e.append((G.edges[u][v], u, v))
-    return e
+def matrix_get_edges(graph):
+    edges = []
+    for u in range(graph.vertices):
+        for v in range(graph.vertices):
+            if graph.edges[u][v] != 0:
+                edges.append((graph.edges[u][v], u, v))
+    return edges
 
 
-def find(C, u):
-    if C[u] != u:
-        C[u] = find(C, C[u])  # Path compression
-    return C[u]
+def find(groups, u):
+    if groups[u] != u:
+        groups[u] = find(groups, groups[u])  # Path compression
+    return groups[u]
 
 
-def union(C, R, u, v):
-    u, v = find(C, u), find(C, v)
-    if R[u] > R[v]:  # Union by rank
-        C[v] = u
+def union(groups, ranks, u, v):
+    u, v = find(groups, u), find(groups, v)
+    if ranks[u] > ranks[v]:  # Union by rank
+        groups[v] = u
     else:
-        C[u] = v
-    if R[u] == R[v]:  # A tie: Move v up a level
-        R[v] += 1
+        groups[u] = v
+    if ranks[u] == ranks[v]:  # A tie: Move v up a level
+        ranks[v] += 1
